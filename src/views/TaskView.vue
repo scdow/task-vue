@@ -74,7 +74,7 @@
           <el-table-column label="操作">
             <template #default="{row}">
 
-              <el-button size="small" type="" plain  @click="() => { editDialog = true; id = row.id; name=row.name; editForm.name = row.name}"> 编辑 </el-button>
+              <el-button size="small" type="" plain  @click="() => { editDialog = true; id = row.id;  editForm.name = row.name}"> 编辑 </el-button>
                 <el-dialog v-model="editDialog" title="编辑" width="500">
 
                   <el-form :model="editForm" label-width="auto" style="max-width: 600px">
@@ -92,13 +92,13 @@
 
               <el-button size="small" type="warning" plain  @click="() => { deleteDialog = true; id = row.id; name=row.name}"> 删除 </el-button>
                 <el-dialog v-model="deleteDialog" title="删除" width="500">
-                  <span>确定删除 {{name }} 任务吗？</span>
-                  <template #footer>
-                    <div class="dialog-footer">
-                      <el-button @click="deleteDialog = false">取消</el-button>
-                      <el-button type="primary"  @click="() => { deleteDialog = false; handleDelete(id); }"> 确定  </el-button>
-                    </div>
-                  </template>
+                  <span>确定删除 {{name}} 任务吗？</span>
+                  <!-- <template #footer> -->
+                  <div class="dialog-footer">
+                    <el-button @click="deleteDialog = false">取消</el-button>
+                    <el-button type="primary"  @click="() => { deleteDialog = false; handleDelete(id); }"> 确定  </el-button>
+                  </div>
+                  <!-- </template> -->
                 </el-dialog>
             </template>
             
@@ -153,16 +153,12 @@ const onQuery = () => {
   const params = new URLSearchParams();
   params.append('name', formInline.taskName);
   params.append('code', formInline.taskCode);
-  if (formInline.createTime && formInline.createTime.length === 2) {
-    console.log(formInline.createTime[0])
-    console.log(formInline.createTime[1])
-    console.log(dayjs(formInline.createTime[0]).format('YYYY-MM-DD HH:mm:ss'))
-    console.log(dayjs(formInline.createTime[1]).format('YYYY-MM-DD HH:mm:ss'))
-    params.append('startTime', dayjs(formInline.createTime[0]).format('YYYY-MM-DD HH:mm:ss'));
-    params.append('endTime', dayjs(formInline.createTime[1]).format('YYYY-MM-DD HH:mm:ss'));
-    // params.append('startTime', formInline.createTime[0].toISOString());
-    // params.append('endTime', formInline.createTime[1].toISOString());
+  if (formInline.createTime && formInline.createTime.length == 2) {
+    params.append('startDate', dayjs(formInline.createTime[0]).format('YYYY-MM-DD HH:mm:ss'));
+    params.append('endDate', dayjs(formInline.createTime[1]).format('YYYY-MM-DD HH:mm:ss'));
   }
+  console.log('params:')
+  console.log(params)
 
   // 发送 GET 请求
   axios.get(url_head + '/taskdto/query', { params })
@@ -186,10 +182,15 @@ const editForm = reactive({
 })
 
 const handleEdit = (id) => {
-  // 发送 POST 请求
-  axios.post(  `${url_head}/task/${id}`, editForm.name)
+  console.log(id)
+  console.log('Edit')
+  const params = {
+    name: editForm.name,  
+  };
+  console.log(editForm.name)
+
+  axios.put(`${url_head}/task/${id}`, editForm.name, {headers:{'Content-Type':'text/plain'}})
     .then((result) => {
-      console.log(editForm.name)
       console.log(result);
       getList();  // 更新成功后重新获取列表
     })
@@ -216,6 +217,7 @@ const handleDelete = (id) => {
 }
 
 
+
 // 新增条目
 const addDialog = ref(false)
 const addForm = reactive({
@@ -226,7 +228,7 @@ const onAddItem = () =>{
   console.log('Add')
   // 创建一个对象来存储请求数据
   const params = {
-    name: addForm.name,  // 这里替换为你需要发送的实际数据
+    name: addForm.name,  
   };
   console.log(params)
   // 发送 POST 请求
