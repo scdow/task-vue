@@ -67,14 +67,14 @@
         <!-- 表格 -->
         <el-table :data="tableData" stripe style="width: 100%">
           <el-table-column prop="name" label="名称" width="180" />
-          <el-table-column prop="code" label="编码" width="180" />
+          <el-table-column prop="code" label="编码" width="320" />
           <el-table-column prop="create_time" label="创建时间" width="180" />
           <el-table-column prop="update_time" label="更新时间" width="180" />
 
           <el-table-column label="操作">
             <template #default="{row}">
 
-              <el-button size="small" type="" plain  @click="() => { editDialog = true; id = row.id;  editForm.name = row.name}"> 编辑 </el-button>
+              <el-button size="small" type="default" plain style="margin-right: 10px;"  @click="() => { editDialog = true; id = row.id;  editForm.name = row.name}"> 编辑 </el-button>
                 <el-dialog v-model="editDialog" title="编辑" width="500">
 
                   <el-form :model="editForm" label-width="auto" style="max-width: 600px">
@@ -106,6 +106,24 @@
           </el-table-column>
 
         </el-table>
+
+
+        <!-- 分页 -->
+        <div style="height: 12px;"></div>
+        <div class="demo-pagination-block">
+          <!-- <div class="demonstration">Jump to</div> -->
+          <el-pagination 
+            v-model:current-page="currentPage"
+            v-model:page-size="pageSize"
+            :small="small"
+            :disabled="disabled"
+            :background="background"
+            layout="prev, pager, next, jumper"
+            :total="1000"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
      
       </el-main>
     
@@ -192,7 +210,8 @@ const handleEdit = (id) => {
   axios.put(`${url_head}/task/${id}`, editForm.name, {headers:{'Content-Type':'text/plain'}})
     .then((result) => {
       console.log(result);
-      getList();  // 更新成功后重新获取列表
+      // getList();  // 更新成功后重新获取列表
+      fetchData()
     })
     .catch((error) => {
       console.error(error);
@@ -209,7 +228,8 @@ const handleDelete = (id) => {
   axios.put(`${url_head}/task/hide/${id}`)
     .then((result) => {
       console.log(result);
-      getList();
+      // getList();
+      fetchData()
     })
     .catch((error) => {
       console.error(error);
@@ -243,8 +263,39 @@ const onAddItem = () =>{
 }
 
 
+// 分页
+const currentPage = ref(1)
+const pageSize = ref(6)
+const small = ref(false)
+const background = ref(false)
+const disabled = ref(false)
+
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+  pageSize.value = val
+  fetchData()
+}
+const handleCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+  currentPage.value = val
+  fetchData()
+}
+
+const fetchData = () => {
+      axios.get(`http://localhost:8080/taskdto/paged?page=${currentPage.value-1}&size=${pageSize.value}`)
+        .then(response => {
+          tableData.value = response.data.data.content;
+          // this.total = response.data.totalElements;
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+
+
 onMounted(() => {
-  getList()
+  // getList()
+  fetchData()
 })
   
 </script>
@@ -257,6 +308,14 @@ onMounted(() => {
 
 .demo-form-inline .el-select {
   --el-select-width: 220px;
+}
+
+.demo-pagination-block + .demo-pagination-block {
+  margin-top: 10px;
+}
+
+.demo-pagination-block .demonstration {
+  margin-bottom: 16px;
 }
 </style>
 
