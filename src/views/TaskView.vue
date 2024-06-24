@@ -119,7 +119,7 @@
             :disabled="disabled"
             :background="background"
             layout="prev, pager, next, jumper"
-            :total="1000"
+            :total="total"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
           />
@@ -179,16 +179,16 @@ const onQuery = () => {
   console.log(params)
 
   // 发送 GET 请求
-  axios.get(url_head + '/taskdto/query', { params })
+  axios.get(url_head + `/taskdto/query/paged?page=${currentPage.value-1}&size=${pageSize.value}`, { params })
     .then((result) => {
       // 将返回的数据设置为 tableData
-      tableData.value = result.data.data;
+      tableData.value = result.data.data.content;
+      total.value = result.data.data.totalElements;
     })
     .catch((error) => {
       console.error(error);
     });
 }
-
 
 
 
@@ -211,7 +211,7 @@ const handleEdit = (id) => {
     .then((result) => {
       console.log(result);
       // getList();  // 更新成功后重新获取列表
-      fetchData()
+      onQuery()
     })
     .catch((error) => {
       console.error(error);
@@ -229,7 +229,7 @@ const handleDelete = (id) => {
     .then((result) => {
       console.log(result);
       // getList();
-      fetchData()
+      onQuery()
     })
     .catch((error) => {
       console.error(error);
@@ -255,7 +255,7 @@ const onAddItem = () =>{
   axios.post(url_head+"/task", params)
     .then((response) => {
       console.log(response);
-      getList();  // 更新成功后重新获取列表
+      onQuery() // 更新成功后重新获取列表
     })
     .catch((error) => {
       console.error(error);
@@ -265,27 +265,28 @@ const onAddItem = () =>{
 
 // 分页
 const currentPage = ref(1)
-const pageSize = ref(6)
+const pageSize = ref(15)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
+const total = ref(1); // 新增一个响应式引用来存储总记录数
 
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
   pageSize.value = val
-  fetchData()
+  onQuery()
 }
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
   currentPage.value = val
-  fetchData()
+  onQuery()
 }
 
 const fetchData = () => {
-      axios.get(`http://localhost:8080/taskdto/paged?page=${currentPage.value-1}&size=${pageSize.value}`)
+      axios.get(url_head + `/taskdto/current/paged?page=${currentPage.value-1}&size=${pageSize.value}`)
         .then(response => {
           tableData.value = response.data.data.content;
-          // this.total = response.data.totalElements;
+          total.value = response.data.data.totalElements;
         })
         .catch(error => {
           console.error(error);
