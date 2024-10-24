@@ -7,14 +7,17 @@
         <el-scrollbar>
           <el-menu> 
         
-            <el-menu-item >任务管理</el-menu-item>
-            <el-menu-item >其它</el-menu-item>
+            <el-menu-item :class="{ 'is-active': currentView === 'taskManagement' }" @click="currentView = 'taskManagement'">任务管理</el-menu-item>
+            <el-menu-item :class="{ 'is-active': currentView === 'other' }" @click="currentView = 'other'">其它</el-menu-item>
               
           </el-menu>
         </el-scrollbar>
       </el-aside>
 
-      <el-main>
+      <el-main v-if="currentView === 'other'">
+        <!-- 其它-->
+      </el-main>
+      <el-main v-if="currentView === 'taskManagement'">
 
         <!-- 表单 -->
         <el-form :ref="formInlineRef" :inline="true" :model="formInline"  class="demo-form-inline">
@@ -142,6 +145,9 @@ import { ElMessageBox } from 'element-plus'
 import type { ComponentSize, FormInstance, FormRules } from 'element-plus'
 
 const url_head = 'http://localhost:8080'
+
+// 控制el-main的内容
+const currentView = ref("taskManagement")
 
 
 // 表格内容
@@ -318,6 +324,12 @@ onMounted(() => {
 .demo-pagination-block .demonstration {
   margin-bottom: 16px;
 }
+
+/* .is-active {
+  font-weight: bold;
+} */
 </style>
+
+
 
 
